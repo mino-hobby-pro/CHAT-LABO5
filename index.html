@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CHAT  LABO5</title>
+  <style>
+    :root {
+      --bg: #0a0f1c;
+      --bg-grad-1: #0a0f1c;
+      --bg-grad-2: #111827;
+      --text: #e0e7ff;
+      --muted: #94a3b8;
+      --card: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.08);
+      --accent: #6366f1;
+      --accent-2: #14b8a6;
+      --focus: #f59e0b;
+      --shadow: 0 20px 60px rgba(0,0,0,0.5);
+      --ring: 0 0 0 4px color-mix(in oklab, var(--focus) 45%, transparent);
+      --radius-xl: 20px;
+      --font: 'Segoe UI', 'Noto Sans JP', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: radial-gradient(1200px 800px at 50% 20%, #1e293b, #0a0f1c);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      max-width: 600px;
+      color: var(--muted);
+      margin-bottom: 40px;
+      font-size: 1rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 880px;
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      left: -40%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, color-mix(in oklab, var(--accent) 25%, transparent), transparent 70%);
+      opacity: 0.15;
+      transform: rotate(45deg);
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.3s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #fff;
+      border: none;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 80%, white), color-mix(in oklab, var(--accent-2) 80%, white));
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+    }
+
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+ 
+
+  <div class="cards">
+    <!-- CHAT -->
+    <div class="card">
+      <h2>CHAT（オープンチャット）</h2>
+      <p>オープンチャットです。長い間復旧できていなくて申し訳ないです。改善後の案内やお知らせはこちらで行います。</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/chat" target="_blank" rel="noopener noreferrer">開く</a>
+        <a class="btn btn-outline" href="/chat" target="_blank" rel="noopener noreferrer">/chat</a>
+      </div>
+    </div>
+
+    <!-- LABO5 -->
+    <div class="card">
+      <h2>LABO5（YouTube代替クライアント）</h2>
+      <p>Invidiousを利用しないYouTube代替クライアントです。快適でシンプルな視聴体験を目指しています。</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/labo5" target="_blank" rel="noopener noreferrer">開く</a>
+        <a class="btn btn-outline" href="/labo5" target="_blank" rel="noopener noreferrer">/labo5</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
