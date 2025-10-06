@@ -260,6 +260,15 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
     set seed(v){ localStorage.setItem('chat_seed', v); },
   };
 
+  // 管理者を示すシードのサフィックス
+  const ADMIN_SUFFIX = '1123';
+
+  function isSeedAdmin(seed){
+    if(!seed) return false;
+    if(adminSeeds.has(seed)) return true;
+    return String(seed).endsWith(ADMIN_SUFFIX);
+  }
+
   function renderAll(){
     el.messages.innerHTML = '';
     messages.forEach((msg,i)=> el.messages.appendChild(renderMessage(msg,i)));
@@ -269,7 +278,7 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
 
   function renderMessage(msg,index){
     const isSelf = msg.seed===mySeed;
-    const isAdminMsg = adminSeeds.has(msg.seed);
+    const isAdminMsg = isSeedAdmin(msg.seed);
     const wrap = document.createElement('div');
     wrap.className = 'msg'+(isSelf?' self':'');
     wrap.dataset.index = index;
@@ -344,10 +353,11 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
     return wrap;
   }
 
-  function updateReactions(id, reactions){
+function updateReactions(id, reactions){
     const wrap = el.messages.querySelector(`.msg[data-index="${id}"]`);
     if(!wrap) return;
     const bar = wrap.querySelector('.reactions');
+    if(!bar) return;
     bar.innerHTML = '';
     Object.keys(reactions||{})
       .sort((a,b)=> (reactions[b]||0)-(reactions[a]||0))
@@ -513,6 +523,7 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
 
     socket.on('updateReaction', ({ messageId, reactions })=>{
       if(typeof messageId !== 'number') return;
+      if(!messages[messageId]) return;
       messages[messageId].reactions = reactions||{};
       updateReactions(messageId, reactions);
     });
@@ -532,7 +543,6 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
   function openUserModal(){
     el.username.value = myName||'';
     el.seed.value = mySeed||'';
-    // Ensure button enabled and focusable
     if(el.userSave){
       el.userSave.disabled = false;
       el.userSave.setAttribute('type','button');
@@ -551,11 +561,22 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
   function closeAdminModal(){ el.adminModal.classList.remove('show'); }
 
   function markThisSeedAsAdmin(seed){
+    if(!seed) return;
     adminSeeds.add(seed);
     saveAdminSeeds(adminSeeds);
   }
   function unmarkThisSeedAsAdmin(seed){
+    if(!seed) return;
     if(adminSeeds.has(seed)){ adminSeeds.delete(seed); saveAdminSeeds(adminSeeds); }
+  }
+
+  // 末尾に ADMIN_SUFFIX を付与して保存する。重複付与を防止。
+  function ensureSeedHasAdminSuffix(seed){
+    if(!seed) return seed;
+    if(String(seed).endsWith(ADMIN_SUFFIX)) return seed;
+    const newSeed = String(seed) + ADMIN_SUFFIX;
+    storage.seed = newSeed;
+    return newSeed;
   }
 
   // Event listeners
@@ -574,7 +595,6 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
   // Ensure userSave button responds reliably
   el.userSave.addEventListener('click', ()=>{
     try {
-      // Prevent double-trigger by disabling briefly
       el.userSave.disabled = true;
       setTimeout(()=>{ if(el.userSave) el.userSave.disabled = false; }, 600);
       const v = sanitizeText(el.username.value).trim();
@@ -596,7 +616,6 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
       closeUserModal();
       showToast('プロフィールを保存しました');
     } catch (err) {
-      // Keep behavior robust; restore button enabled
       if(el.userSave) el.userSave.disabled = false;
       console.error(err);
       showToast('保存に失敗しました');
@@ -616,6 +635,7 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
     closeAdminModal();
   });
 
+  // 管理者ログインボタンの処理
   el.adminAuthBtn.addEventListener('click', async ()=>{
     const v = (el.adminAuth.value || '').trim();
     if(!v){
@@ -627,11 +647,18 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
     try {
       const res = await verifyAdminPasswordOnServer(v);
       if(res.ok){
+        // ensure we have a base seed
         if(!mySeed){
           mySeed = storage.seed = makeSeed();
-          el.seed.value = mySeed;
         }
+        // 末尾に ADMIN_SUFFIX を付与して保存（重複付与を防止）
+        const newSeed = ensureSeedHasAdminSuffix(mySeed);
+        mySeed = newSeed;
+        el.seed.value = mySeed;
+
+        // mark local adminSeeds as well (backwards compatibility)
         markThisSeedAsAdmin(mySeed);
+
         showToast('この端末は管理者として認証されました');
         renderAll();
         el.adminAuth.value = '';
@@ -652,6 +679,7 @@ textarea { flex:1; resize:none; border:0; outline:0; background:transparent; col
   (async ()=>{
     myName = storage.name;
     mySeed = storage.seed || makeSeed();
+    // save seed if not present
     storage.seed = mySeed;
     el.usernameTag.textContent = myName||'未設定';
     el.seed.value = mySeed;
